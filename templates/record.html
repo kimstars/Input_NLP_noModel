@@ -74,7 +74,7 @@
                                 const XHR = new XMLHttpRequest();
                                 var data = new FormData()
                                 data.append('file', blob, 'fileaudio');
-                                XHR.open('POST', "http://127.0.0.1:8000/receive", true);
+                                XHR.open('POST', window.location.origin+"/receive", true);
                                 XHR.send(data);
                             });
                         }
