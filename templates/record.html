@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Audio Recorder</title>
+    <meta charset="UTF-8">
+    <meta name="Keywords" content="js,audio recorder">
+    <meta name="Description" content="Recording audio with HTML">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="initial-scale=1.0, width=device-width">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="icon" type="image/ico" href="https://markjivko.com/favicon.ico">
+
+    <link rel="stylesheet" href="{{url_for('static', path='./css/styleRecord.css')}}">
+    <script type="text/javascript" src="https://code.jquery.com/jquery.min.js"></script>
+    <script src="{{url_for('static', path='./js/recorder.js')}}"></script>
+    <script>
+        jQuery(document).ready(function () {
+            var $ = jQuery;
+            var myRecorder = {
+                objects: {
+                    context: null,
+                    stream: null,
+                    recorder: null
+                },
+                init: function () {
+                    if (null === myRecorder.objects.context) {
+                        myRecorder.objects.context = new (
+                            window.AudioContext || window.webkitAudioContext
+                        );
+                    }
+                },
+                start: function () {
+                    var options = { audio: true, video: false };
+                    navigator.mediaDevices.getUserMedia(options).then(function (stream) {
+                        myRecorder.objects.stream = stream;
+                        myRecorder.objects.recorder = new Recorder(
+                            myRecorder.objects.context.createMediaStreamSource(stream),
+                            { numChannels: 1 }
+                        );
+                        myRecorder.objects.recorder.record();
+                    }).catch(function (err) { });
+                },
+                stop: function (listObject) {
+                    var filename = "";
+                    if (null !== myRecorder.objects.stream) {
+                        myRecorder.objects.stream.getAudioTracks()[0].stop();
+                    }
+                    if (null !== myRecorder.objects.recorder) {
+                        myRecorder.objects.recorder.stop();
+
+                        // Validate object
+                        if (null !== listObject
+                            && 'object' === typeof listObject
+                            && listObject.length > 0) {
+                            // Export the WAV file
+                            myRecorder.objects.recorder.exportWAV(function (blob) {
+
+                                var url = URL.createObjectURL(blob);
+                                var li = document.createElement('div');
+                                var au = document.createElement('audio');
+                                var hf = document.createElement('a');
+                                filename = new Date().toISOString();
+                                au.controls = true;
+                                au.src = url;
+                                hf.href = url;
+                                hf.download = filename + '.wav';
+                                li.appendChild(au);
+                                li.appendChild(hf);
+                                // hf.click();
+                                listObject.append(li);
+
+                                const XHR = new XMLHttpRequest();
+                                var data = new FormData()
+                                data.append('file', blob, 'fileaudio');
+                                XHR.open('POST', "http://127.0.0.1:8000/receive", true);
+                                XHR.send(data);
+                            });
+                        }
+
+
+
+
+                    }
+                }
+            };
+
+
+
+            // Prepare the recordings list
+            var listObject = $('[data-role="recordings"]');
+
+            // Prepare the record button
+            $('[data-role="controls"] > button').click(function () {
+                // Initialize the recorder
+                myRecorder.init();
+
+                // Get the button state 
+                var buttonState = !!$(this).attr('data-recording');
+
+                // Toggle
+                if (!buttonState) {
+                    $(this).attr('data-recording', 'true');
+                    myRecorder.start();
+                } else {
+                    $(this).attr('data-recording', '');
+                    myRecorder.stop(listObject);
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="holder">
+        <div data-role="controls">
+            <button>Record</button>
+        </div>
+        <div data-role="recordings"></div>
+    </div>
+</body>
+
+</html>

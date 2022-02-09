@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
-from fastapi import FastAPI, Body, Request, Form
+from fastapi import FastAPI, Body, Request, Form,UploadFile,File
 import requests
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -295,4 +295,24 @@ async def Find_Ans(request: Request,question: str  = Form(...)):
     ListRecent = ggapi.recentQuestion()
     return templates.TemplateResponse("SearchGG.html",{"request": request,"ListAns":ListAns, "ListLink":ListLink, "leng":leng, "question" : question , "ListRecent" :ListRecent})
 
+
+
+#================== RECORD AUDIO TO VOICE HANDLE ========================
+
+@app.get("/record", response_class=HTMLResponse)
+async def record(request: Request):
+
+    return templates.TemplateResponse("record.html", {"request": request})
+
+
+
+@app.post('/receive')
+async def receiveData(request: Request,file: UploadFile= File(...)):
+    print(file.filename)
+    audio_bytes = file.file.read()
+    
+    with open("audio.wav","wb") as f: 
+        f.write(audio_bytes)
+
+    return templates.TemplateResponse("record.html",{"request": request})
 
