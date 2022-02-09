@@ -65,16 +65,18 @@
                                 au.controls = true;
                                 au.src = url;
                                 hf.href = url;
+                                hf.innerHTML = "&#9660;";
                                 hf.download = filename + '.wav';
                                 li.appendChild(au);
                                 li.appendChild(hf);
-                                // hf.click();
+                                li.classList.add("row");
+                           
                                 listObject.append(li);
 
                                 const XHR = new XMLHttpRequest();
                                 var data = new FormData()
                                 data.append('file', blob, 'fileaudio');
-                                XHR.open('POST', window.location.origin+"/receive", true);
+                                XHR.open('POST', window.location.origin +"/receive", true);
                                 XHR.send(data);
                             });
                         }
