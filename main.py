@@ -125,9 +125,11 @@ def write_home(request: Request ):
 
 @app.post('/home')
 async def handle_form(content : str = Form(...), qas : list = Form(...), nameCollection:str = Form(...)):
+    colname = mydb.list_collection_names()
     collection = mydb[nameCollection]
     listQuestion = numbering.createListQuestion(qas) 
     listAnswer = numbering.createListAnswer(qas)
+    user_name = "Up thành công nhé"
     MainProcess(collection, content, listQuestion, listAnswer)
     return templates.TemplateResponse("home.html", {"request": request,
                                                     "username": user_name,
