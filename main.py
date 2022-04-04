@@ -115,7 +115,7 @@ def MainProcess(collection, content, listQuestion , listAnswer):# tạo data và
     return (newData.dict())
 
 @app.get("/home", response_class=HTMLResponse)
-def write_home(request: Request ):
+def write_home(request: Request):
     colname = mydb.list_collection_names()
     user_name = "MTA NLP TEAM"
     return templates.TemplateResponse("home.html", {"request": request,
@@ -124,7 +124,7 @@ def write_home(request: Request ):
                                                     })
 
 @app.post('/home')
-async def handle_form(content : str = Form(...), qas : list = Form(...), nameCollection:str = Form(...)):
+async def handle_form(request: Request,content : str = Form(...), qas : list = Form(...), nameCollection:str = Form(...)):
     colname = mydb.list_collection_names()
     collection = mydb[nameCollection]
     listQuestion = numbering.createListQuestion(qas) 
