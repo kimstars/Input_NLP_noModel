@@ -85,14 +85,6 @@ def loadData(request: Request, nameCollection:str = Form(...) ):
 })
 
 
-@app.get("/home", response_class=HTMLResponse)
-def write_home(request: Request ):
-    colname = mydb.list_collection_names()
-    user_name = "MTA NLP TEAM"
-    return templates.TemplateResponse("home.html", {"request": request,
-                                                    "username": user_name,
-                                                    "CollectionName":colname,
-                                                    })
 
 
 def MainProcess(collection, content, listQuestion , listAnswer):# tạo data và thêm vào db
@@ -122,13 +114,25 @@ def MainProcess(collection, content, listQuestion , listAnswer):# tạo data và
     collection.insert_one(newData.dict())
     return (newData.dict())
 
+@app.get("/home", response_class=HTMLResponse)
+def write_home(request: Request ):
+    colname = mydb.list_collection_names()
+    user_name = "MTA NLP TEAM"
+    return templates.TemplateResponse("home.html", {"request": request,
+                                                    "username": user_name,
+                                                    "CollectionName":colname,
+                                                    })
 
 @app.post('/home')
 async def handle_form(content : str = Form(...), qas : list = Form(...), nameCollection:str = Form(...)):
     collection = mydb[nameCollection]
     listQuestion = numbering.createListQuestion(qas) 
     listAnswer = numbering.createListAnswer(qas)
-    return MainProcess(collection, content, listQuestion, listAnswer)
+    MainProcess(collection, content, listQuestion, listAnswer)
+    return templates.TemplateResponse("home.html", {"request": request,
+                                                    "username": user_name,
+                                                    "CollectionName":colname,
+                                                    })
 
 
 @app.get("/display-data", response_class=HTMLResponse)
